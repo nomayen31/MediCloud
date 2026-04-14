@@ -1,5 +1,7 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import { prisma } from "./app/lib/prisma";
+import { IndexRoutes } from "./app/Routes";
+
 
 const app : Application = express();
 
@@ -8,6 +10,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Routes
+app.use("/api/v1", IndexRoutes.router);
 
 // Basic route
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
