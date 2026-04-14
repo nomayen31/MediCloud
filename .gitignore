@@ -131,3 +131,4 @@ dist/
 *.swp
 *.swo
 *~
+/generated/prisma
