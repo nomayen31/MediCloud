@@ -1,116 +1,133 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { SpecialityService } from "./speciality.service";
+import { catchAsync } from "../../shared/catchAsync";
+import { sendResponse } from "../../shared/sendResponse";
 
-const createSpeciality = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const payload = req.body;
-        const result = await SpecialityService.createSpeciality(payload);
-        res.status(201).json({
-            success: true,
-            data: result,
-            message: "Speciality created successfully"
-        });
-    } catch (error: unknown) {
-        console.log("Error in createSpeciality controller:", error);
-        res.status(500).json({
+
+
+
+const createSpeciality = catchAsync(async (req: Request, res: Response) => {
+    const payload = req.body;
+    const result = await SpecialityService.createSpeciality(payload);
+    
+    sendResponse(res, {
+        success: true,
+        data: result,
+        message: "Speciality created successfully",
+        httpStatusCode: 201
+    });
+});
+
+const getAllSpecialities = catchAsync(async (req: Request, res: Response) => {
+    const result = await SpecialityService.getAllSpecialities();
+    sendResponse(res, {
+        success: true,
+        message: "Specialities fetched successfully",
+        data: result,
+        httpStatusCode: 200
+    });
+});
+
+const getSpecialityById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    // Validate that id is a string, not an array
+    if (Array.isArray(id)) {
+        return sendResponse(res, {
             success: false,
-            message: "An error occurred while creating the speciality"
+            message: "Invalid ID format",
+            httpStatusCode: 400
         });
-        next(error); // ← forward to error middleware
     }
-};
-
-const getAllSpecialities = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const result = await SpecialityService.getAllSpecialities();
-        res.status(200).json({
-            message: "Specialities fetched successfully",
-            success: true,
-            data: result
-        });
-    } catch (error: unknown) {
-        console.log("Error in getAllSpecialities controller:", error);
-        res.status(500).json({
+    
+    console.log("Received ID:", id);
+    console.log("ID type:", typeof id);
+    
+    const result = await SpecialityService.getSpecialityById(id);
+    
+    console.log("Query result:", result);
+    
+    if (!result) {
+        return sendResponse(res, {
             success: false,
-            message: "An error occurred while fetching specialities"
+            message: "Speciality not found",
+            httpStatusCode: 404
         });
-        next(error);
-    }   
-};  
-
-const deleteSpeciality = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const id = req.params.id;
-        const result = await SpecialityService.deleteSpeciality(id as string);
-        res.status(200).json({
-            success: true,
-            message: "Speciality deleted successfully",
-            data: result
-        });
-    } catch (error: unknown) {
-        console.log("Error in deleteSpeciality controller:", error);
-        res.status(500).json({
-            success: false,
-            message: "An error occurred while deleting the speciality"
-        });
-        next(error);
     }
-};
+    
+    sendResponse(res, {
+        success: true,
+        message: "Speciality fetched successfully",
+        data: result,
+        httpStatusCode: 200
+    });
+});
 
-const updateSpeciality = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const id = req.params.id;
-        const payload = req.body;
-        // Implementation for updating a speciality will go here
-        const result = await SpecialityService.updateSpeciality(id as string, payload);
-        res.status(200).json({
-            success: true,
-            message: "Speciality updated successfully",
-            data: result
-        });
-    } catch (error: unknown) {
-        console.log("Error in updateSpeciality controller:", error);
-        res.status(500).json({
+const updateSpeciality = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const payload = req.body;
+    
+    // Validate that id is a string, not an array
+    if (Array.isArray(id)) {
+        return sendResponse(res, {
             success: false,
-            message: "An error occurred while updating the speciality"
+            message: "Invalid ID format",
+            httpStatusCode: 400
         });
-        next(error);
     }
-};
-
-const getSpecialityById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const id = req.params.id;
-        
-        // Add this to check what ID you're receiving
-        console.log("Received ID:", id);
-        console.log("ID type:", typeof id);
-        
-        const result = await SpecialityService.getSpecialityById(id as string);
-        
-        // Add this to see what the query returned
-        console.log("Query result:", result);
-        
-        res.status(200).json({
-            success: true,
-            message: "Speciality fetched successfully",
-            data: result
-        });
-    } catch (error: unknown) {
-        console.log("Error in getSpecialityById controller:", error);
-        res.status(500).json({
+    
+    const result = await SpecialityService.updateSpeciality(id, payload);
+    
+    if (!result) {
+        return sendResponse(res, {
             success: false,
-            message: "An error occurred while fetching the speciality"
+            message: "Speciality not found",
+            httpStatusCode: 404
         });
-        next(error);
     }
-};
+    
+    sendResponse(res, {
+        success: true,
+        message: "Speciality updated successfully",
+        data: result,
+        httpStatusCode: 200
+    });
+});
 
+const deleteSpeciality = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    // Validate that id is a string, not an array
+    if (Array.isArray(id)) {
+        return sendResponse(res, {
+            success: false,
+            message: "Invalid ID format",
+            httpStatusCode: 400
+        });
+    }
+    
+    const result = await SpecialityService.deleteSpeciality(id);
+    
+    if (!result) {
+        return sendResponse(res, {
+            success: false,
+            message: "Speciality not found",
+            httpStatusCode: 404
+        });
+    }
+    
+    sendResponse(res, {
+        success: true,
+        message: "Speciality deleted successfully",
+        data: result,
+        httpStatusCode: 200
+    });
+});
 
 export const SpecialityController = {
     createSpeciality,
     getAllSpecialities,
-    deleteSpeciality,
+    getSpecialityById,
     updateSpeciality,
-    getSpecialityById
-}   
+    deleteSpeciality
+};
