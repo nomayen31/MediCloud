@@ -14,7 +14,6 @@
     "studio": "prisma studio",
     "push": "prisma db push",
     "pull": "prisma db pull"
-
   },
   "keywords": [],
   "author": "",
@@ -24,6 +23,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "7.7.0",
+    "better-auth": "^1.6.5",
     "dotenv": "^17.4.2",
     "express": "^5.2.1"
   },

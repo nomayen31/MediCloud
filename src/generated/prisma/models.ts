@@ -8,5 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Speciality'
-export type * from './commonInputTypes'
+export type * from './models/User.js'
+export type * from './models/Patient.js'
+export type * from './models/Session.js'
+export type * from './models/Account.js'
+export type * from './models/Verification.js'
+export type * from './models/Speciality.js'
+export type * from './commonInputTypes.js'

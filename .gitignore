@@ -131,4 +131,10 @@ dist/
 *.swp
 *.swo
 *~
-/generated/prisma
+
+# ========================
+# Prisma
+# ========================
+generated/
+src/generated/
+prisma/generated/

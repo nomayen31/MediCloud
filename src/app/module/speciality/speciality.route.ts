@@ -14,6 +14,4 @@ router.put("/:id", SpecialityController.updateSpeciality);
 router.delete("/:id", SpecialityController.deleteSpeciality);
 
 
-export const SpecialityRoutes = {
-    router
-}
+export const SpecialityRoutes = router;
