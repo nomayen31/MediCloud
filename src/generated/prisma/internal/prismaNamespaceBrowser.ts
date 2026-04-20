@@ -52,10 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Patient: 'Patient',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Patient: 'Patient',
   Speciality: 'Speciality'
 } as const
 
@@ -91,31 +91,6 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
-export const PatientScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  dateOfBirth: 'dateOfBirth',
-  gender: 'gender',
-  phoneNumber: 'phoneNumber',
-  address: 'address',
-  city: 'city',
-  state: 'state',
-  zipCode: 'zipCode',
-  country: 'country',
-  emergencyContact: 'emergencyContact',
-  emergencyPhone: 'emergencyPhone',
-  bloodGroup: 'bloodGroup',
-  allergies: 'allergies',
-  medicalHistory: 'medicalHistory',
-  isDeleted: 'isDeleted',
-  deletedAt: 'deletedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
@@ -161,6 +136,34 @@ export const VerificationScalarFieldEnum = {
 } as const
 
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
+
+
+export const PatientScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  profilePicture: 'profilePicture',
+  dateOfBirth: 'dateOfBirth',
+  gender: 'gender',
+  phoneNumber: 'phoneNumber',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  zipCode: 'zipCode',
+  country: 'country',
+  emergencyContact: 'emergencyContact',
+  emergencyPhone: 'emergencyPhone',
+  bloodGroup: 'bloodGroup',
+  allergies: 'allergies',
+  medicalHistory: 'medicalHistory',
+  isDeleted: 'isDeleted',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
 
 
 export const SpecialityScalarFieldEnum = {

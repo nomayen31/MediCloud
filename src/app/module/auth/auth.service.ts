@@ -1,4 +1,4 @@
-import { Role } from "../../../generated/prisma/client";
+import { Gender, Role, UserStatus } from "../../../generated/prisma/client";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 
@@ -6,6 +6,20 @@ interface RegisterPatientPayload {
     name: string;
     email: string;
     password: string;
+    profilePicture?: string;
+    dateOfBirth?: string; // ISO date string
+    gender?: Gender;
+    phoneNumber?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+    emergencyContact?: string;
+    emergencyPhone?: string;
+    bloodGroup?: string;
+    allergies?: string;
+    medicalHistory?: string;
 }
 
 interface LoginPayload {
@@ -14,7 +28,25 @@ interface LoginPayload {
 }
 
 const registerPatient = async (payload: RegisterPatientPayload) => {
-    const { name, email, password } = payload;
+    const { 
+        name, 
+        email, 
+        password,
+        profilePicture,
+        dateOfBirth,
+        gender,
+        phoneNumber,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+        emergencyContact,
+        emergencyPhone,
+        bloodGroup,
+        allergies,
+        medicalHistory
+    } = payload;
 
     // Register user with BetterAuth
     const data = await auth.api.signUpEmail({
@@ -33,7 +65,7 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
 
     try {
         // Use transaction to update user role and create patient profile
-        await prisma.$transaction(async (tx) => {
+        const patientData = await prisma.$transaction(async (tx) => {
             // Update user role to PATIENT
             await tx.user.update({
                 where: { id: userId },
@@ -42,12 +74,30 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
                 }
             });
 
-            // Create patient profile
-            await tx.patient.create({
+            // Create patient profile with all fields
+            const patient = await tx.patient.create({
                 data: {
                     userId: userId,
+                    name: name,
+                    email: email,
+                    profilePicture: profilePicture,
+                    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+                    gender: gender,
+                    phoneNumber: phoneNumber,
+                    address: address,
+                    city: city,
+                    state: state,
+                    zipCode: zipCode,
+                    country: country,
+                    emergencyContact: emergencyContact,
+                    emergencyPhone: emergencyPhone,
+                    bloodGroup: bloodGroup,
+                    allergies: allergies,
+                    medicalHistory: medicalHistory,
                 }
             });
+
+            return patient;
         });
 
         // Auto-login after registration to get token
@@ -58,7 +108,11 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
             }
         });
 
-        return loginData; // This includes user and session with token
+        // Combine login data with patient information
+        return {
+            ...loginData,
+            patient: patientData
+        };
     } catch (error) {
         console.error("Error in registerPatient:", error);
         
@@ -84,6 +138,37 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
 const login = async (payload: LoginPayload) => {
     const { email, password } = payload;
 
+    // 🔍 Check if user exists
+    const existingUser = await prisma.user.findUnique({
+        where: { email },
+        include: {
+            patient: true // Include patient data
+        }
+    });
+
+    if (!existingUser) {
+        throw {
+            status: "UNAUTHORIZED",
+            message: "Invalid email or password"
+        };
+    }
+
+    // 🚫 Check account status
+    if (existingUser.status === UserStatus.DELETED) {
+        throw {
+            status: "FORBIDDEN",
+            message: "This account has been deleted"
+        };
+    }
+
+    if (existingUser.status === UserStatus.BLOCKED) {
+        throw {
+            status: "FORBIDDEN",
+            message: "This account has been blocked. Please contact support"
+        };
+    }
+
+    // 🔐 Proceed with authentication
     const data = await auth.api.signInEmail({
         body: {
             email,
@@ -92,10 +177,17 @@ const login = async (payload: LoginPayload) => {
     });
 
     if (!data) {
-        throw new Error("Invalid credentials");
+        throw {
+            status: "UNAUTHORIZED",
+            message: "Invalid email or password"
+        };
     }
 
-    return data;
+    // Add patient data to response
+    return {
+        ...data,
+        patient: existingUser.patient
+    };
 };
 
 export const AuthService = {

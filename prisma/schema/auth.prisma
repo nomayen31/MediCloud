@@ -19,36 +19,8 @@ model User {
   @@map("user")
 }
 
-model Patient {
-  id               String    @id @default(cuid())
-  userId           String    @unique
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dateOfBirth      DateTime?
-  gender           Gender?
-  phoneNumber      String?
-  address          String?
-  city             String?
-  state            String?
-  zipCode          String?
-  country          String?
-  emergencyContact String?
-  emergencyPhone   String?
-  bloodGroup       String?
-  allergies        String?
-  medicalHistory   String?
-  isDeleted        Boolean   @default(false)
-  deletedAt        DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
 
-  @@map("patient")
-}
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
 model Session {
   id        String   @id
   expiresAt DateTime

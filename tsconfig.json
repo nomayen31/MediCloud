@@ -3,6 +3,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "target": "ES2023",
+    "rootDir":"./",
     "outDir": "./dist",
     "types": ["node"],
     "strict": true,
