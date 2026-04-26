@@ -1,7 +1,7 @@
-import { Gender, Role, UserStatus } from "../../../generated/prisma/client";
-import { auth } from "../../lib/auth";
-import { prisma } from "../../lib/prisma";
-import { RegisterPatientSchema, LoginSchema, type RegisterPatientPayload, type LoginPayload } from "./auth.validation";
+import { Role, UserStatus } from "../../../generated/prisma/client.js";
+import { auth } from "../../lib/auth.js";
+import { prisma } from "../../lib/prisma.js";
+import { RegisterPatientSchema, LoginSchema, type RegisterPatientPayload, type LoginPayload } from "./auth.validation.js";
 
 const registerPatient = async (payload: RegisterPatientPayload) => {
     // Validate input using Zod

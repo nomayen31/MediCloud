@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { DoctorController } from "./user.controller";
+import { DoctorController } from "./user.controller.js";
 
-import { validateCreateDoctor } from "../../middleware/validateRequest";
+import { validateCreateDoctor } from "../../middleware/validateRequest.js";
 
 
 

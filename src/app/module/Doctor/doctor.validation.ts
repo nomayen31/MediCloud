@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "../../../generated/prisma/client";
+import { Gender } from "../../../generated/prisma/client.js";
 
 const doctorBaseZodSchema = z
   .object({

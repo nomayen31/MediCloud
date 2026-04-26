@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import z from "zod";
-import { catchAsync } from "../shared/catchAsync";
-import { createDoctorZodSchema } from "../module/user/user.validation";
+import { catchAsync } from "../shared/catchAsync.js";
+import { createDoctorZodSchema } from "../module/user/user.validation.js";
 
 export const validateRequest = (
   schemaOrHandler: z.ZodTypeAny | RequestHandler

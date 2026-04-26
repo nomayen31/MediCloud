@@ -1,8 +1,8 @@
-import { prisma } from "../../lib/prisma";
-import { auth } from "../../lib/auth";
-import { Role } from "../../../generated/prisma/enums";
-import { ICreateDoctorPayload } from "./user.interface";
-import { CreateDoctorUserSchema, type CreateDoctorUserPayload } from "../auth/auth.validation";
+import { prisma } from "../../lib/prisma.js";
+import { auth } from "../../lib/auth.js";
+import { Role } from "../../../generated/prisma/enums.js";
+import { ICreateDoctorPayload } from "./user.interface.js";
+import { CreateDoctorUserSchema } from "../auth/auth.validation.js";
 
 const createDoctor = async (payload: ICreateDoctorPayload) => {
   // Validate input using Zod

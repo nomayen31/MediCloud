@@ -1,6 +1,6 @@
-import { Prisma, Doctor } from "../../../generated/prisma/client";
-import { prisma } from "../../lib/prisma";
-import { updateDoctorZodSchema } from "./doctor.validation";
+import { Prisma, Doctor } from "../../../generated/prisma/client.js";
+import { prisma } from "../../lib/prisma.js";
+import { updateDoctorZodSchema } from "./doctor.validation.js";
 
 const getAllDoctors = async (): Promise<Doctor[]> => {
     const doctors = await prisma.doctor.findMany({

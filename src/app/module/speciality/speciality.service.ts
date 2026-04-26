@@ -1,6 +1,6 @@
-import { Prisma, Speciality } from "../../../generated/prisma/client";
-import { prisma } from "../../lib/prisma";
-import { CreateSpecialitySchema, UpdateSpecialitySchema, type CreateSpecialityPayload, type UpdateSpecialityPayload } from "./speciality.validation";
+import { Speciality } from "../../../generated/prisma/client.js";
+import { prisma } from "../../lib/prisma.js";
+import { CreateSpecialitySchema, UpdateSpecialitySchema, type CreateSpecialityPayload, type UpdateSpecialityPayload } from "./speciality.validation.js";
 
 const createSpeciality = async (payload: CreateSpecialityPayload): Promise<Speciality> => {
     // Validate input using Zod

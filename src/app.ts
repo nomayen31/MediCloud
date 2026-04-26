@@ -1,8 +1,8 @@
 import express, { Application, NextFunction, Request, Response } from "express";
-import { prisma } from "./app/lib/prisma";
-import { IndexRoutes } from "./app/Routes";
-import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
-import { notFound } from "./app/middleware/notFound";
+import { prisma } from "./app/lib/prisma.js";
+import { IndexRoutes } from "./app/Routes/index.js";
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
+import { notFound } from "./app/middleware/notFound.js";
 
 
 const app : Application = express();

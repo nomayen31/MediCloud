@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { SpecialityService } from "./speciality.service";
-import { validateRequest } from "../../middleware/validateRequest";
-import { catchAsync } from "../../shared/catchAsync";
-import { sendResponse } from "../../shared/sendResponse";
+import { SpecialityService } from "./speciality.service.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { sendResponse } from "../../shared/sendResponse.js";
 
 
 

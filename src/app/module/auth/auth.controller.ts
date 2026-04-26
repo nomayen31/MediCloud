@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { AuthService } from "./auth.service";
-import { validateRequest } from "../../middleware/validateRequest";
-import { sendResponse } from "../../shared/sendResponse";
+import { AuthService } from "./auth.service.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { sendResponse } from "../../shared/sendResponse.js";
 import status from "http-status";
 
 const registerPatient = validateRequest(async (req: Request, res: Response) => {

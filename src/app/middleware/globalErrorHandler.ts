@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
-import { envVars } from "../../config/env";
+import { envVars } from "../../config/env.js";
 import status from "http-status";
 import { ZodError, ZodIssue } from "zod";
 import {
@@ -8,7 +8,7 @@ import {
   TErrorResponse,
   TZodErrorDetails,
   TZodFieldError,
-} from "../interface/error.interface";
+} from "../interface/error.interface.js";
 
 const formatZodIssue = (
   issue: ZodIssue,

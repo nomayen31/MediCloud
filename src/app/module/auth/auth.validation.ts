@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Gender, Role } from '../../../generated/prisma/client';
+import { Gender } from '../../../generated/prisma/client.js';
 
 export const RegisterPatientSchema = z.object({
   name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { DoctorController } from "./doctor.controller";
-import { validateRequest } from "../../middleware/validateRequest";
-import { updateDoctorRequestZodSchema } from "./doctor.validation";
+import { DoctorController } from "./doctor.controller.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { updateDoctorRequestZodSchema } from "./doctor.validation.js";
 
 const router = Router();
 

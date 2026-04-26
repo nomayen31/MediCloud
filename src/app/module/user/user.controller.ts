@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { UserService } from "./user.service";
+import { UserService } from "./user.service.js";
 import status from "http-status";
 
 interface ISuccessResponse<T> {

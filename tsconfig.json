@@ -3,7 +3,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "target": "ES2023",
-    "rootDir":"./",
+    "rootDir": "./src",   // ✅ FIX HERE
     "outDir": "./dist",
     "types": ["node"],
     "strict": true,
@@ -13,8 +13,7 @@
     "ignoreDeprecations": "6.0"
   },
   "include": [
-    "src/**/*",
-    "prisma.config.ts"
+    "src/**/*"
   ],
   "exclude": ["node_modules", "dist", "generated"]
 }
