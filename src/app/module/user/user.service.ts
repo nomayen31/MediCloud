@@ -2,9 +2,12 @@ import { prisma } from "../../lib/prisma";
 import { auth } from "../../lib/auth";
 import { Role } from "../../../generated/prisma/enums";
 import { ICreateDoctorPayload } from "./user.interface";
+import { CreateDoctorUserSchema, type CreateDoctorUserPayload } from "../auth/auth.validation";
 
 const createDoctor = async (payload: ICreateDoctorPayload) => {
-  const { password, doctor: doctorData, specialities: specialityPayload } = payload;
+  // Validate input using Zod
+  const validatedData = CreateDoctorUserSchema.parse(payload);
+  const { password, doctor: doctorData, specialities: specialityPayload } = validatedData;
 
   // Check if email already exists in User or Doctor table
   const existingUser = await prisma.user.findUnique({

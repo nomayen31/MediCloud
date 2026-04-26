@@ -2,23 +2,72 @@
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../../config/env";
 import status from "http-status";
+import { ZodError, ZodIssue } from "zod";
+import {
+  TCustomError,
+  TErrorResponse,
+  TZodErrorDetails,
+  TZodFieldError,
+} from "../interface/error.interface";
 
-interface CustomError extends Error {
-  statusCode?: number;
-  status?: number;
-  code?: string;
-  meta?: Record<string, unknown>;
-}
+const formatZodIssue = (
+  issue: ZodIssue,
+  isProduction: boolean
+): TZodFieldError => {
+  const fieldPath = issue.path.length > 0 ? issue.path.join(".") : "root";
+  const details: TZodFieldError = {
+    path: fieldPath,
+    message: issue.message,
+  };
 
-interface ErrorResponse {
-  success: false;
-  message: string;
-  errorCode?: string;
-  errorDetails?: unknown;
-  stack?: string;
-  timestamp?: string;
-  path?: string;
-}
+  if (isProduction) {
+    return details;
+  }
+
+  details.code = issue.code;
+
+  if ("expected" in issue) {
+    details.expected = issue.expected;
+  }
+
+  if ("received" in issue) {
+    details.received = issue.received;
+  }
+
+  if ("minimum" in issue) {
+    details.minimum = issue.minimum;
+  }
+
+  if ("maximum" in issue) {
+    details.maximum = issue.maximum;
+  }
+
+  if ("options" in issue) {
+    details.options = issue.options;
+  }
+
+  return details;
+};
+
+const formatZodError = (
+  error: ZodError,
+  isProduction: boolean
+): TZodErrorDetails => {
+  const fields = error.issues.map((issue) => formatZodIssue(issue, isProduction));
+
+  const details: TZodErrorDetails = {
+    summary: `Validation failed for ${fields.length} field${
+      fields.length > 1 ? "s" : ""
+    }`,
+    fields,
+  };
+
+  if (!isProduction) {
+    details.issueCount = fields.length;
+  }
+
+  return details;
+};
 
 export const globalErrorHandler = (
   err: unknown,
@@ -45,14 +94,20 @@ export const globalErrorHandler = (
   let stack: string | undefined;
 
   // ✅ Prisma Known Request Errors
-  if (
+  if (err instanceof ZodError) {
+    statusCode = status.BAD_REQUEST;
+    message = "Validation failed";
+    errorCode = "ZOD_VALIDATION_ERROR";
+    errorDetails = formatZodError(err, isProduction);
+    stack = err.stack;
+  } else if (
     typeof err === "object" &&
     err !== null &&
     "code" in err &&
     "meta" in err &&
     err.constructor.name === "PrismaClientKnownRequestError"
   ) {
-    const prismaErr = err as CustomError;
+    const prismaErr = err as TCustomError;
     errorCode = prismaErr.code;
 
     switch (prismaErr.code) {
@@ -102,47 +157,55 @@ export const globalErrorHandler = (
   }
   // ✅ Native JavaScript Errors
   else if (err instanceof Error) {
-    const customErr = err as CustomError;
+    const customErr = err as TCustomError;
 
-    statusCode =
-      customErr.statusCode ||
-      customErr.status ||
-      status.INTERNAL_SERVER_ERROR;
+    if (customErr.errors instanceof ZodError) {
+      statusCode = status.BAD_REQUEST;
+      message = customErr.message || "Validation failed";
+      errorCode = "ZOD_VALIDATION_ERROR";
+      errorDetails = formatZodError(customErr.errors, isProduction);
+      stack = customErr.stack;
+    } else {
+      statusCode =
+        customErr.statusCode ||
+        customErr.status ||
+        status.INTERNAL_SERVER_ERROR;
 
-    message = customErr.message || message;
-    errorCode = customErr.code;
-    stack = customErr.stack;
+      message = customErr.message || message;
+      errorCode = customErr.code;
+      stack = customErr.stack;
 
-    // Map specific error names to appropriate responses
-    switch (err.name) {
-      case "ValidationError":
-        statusCode = status.BAD_REQUEST;
-        errorCode = "VALIDATION_ERROR";
-        break;
+      // Map specific error names to appropriate responses
+      switch (err.name) {
+        case "ValidationError":
+          statusCode = status.BAD_REQUEST;
+          errorCode = "VALIDATION_ERROR";
+          break;
 
-      case "JsonWebTokenError":
-        statusCode = status.UNAUTHORIZED;
-        message = "Invalid authentication token";
-        errorCode = "INVALID_TOKEN";
-        break;
+        case "JsonWebTokenError":
+          statusCode = status.UNAUTHORIZED;
+          message = "Invalid authentication token";
+          errorCode = "INVALID_TOKEN";
+          break;
 
-      case "TokenExpiredError":
-        statusCode = status.UNAUTHORIZED;
-        message = "Authentication token has expired";
-        errorCode = "TOKEN_EXPIRED";
-        break;
+        case "TokenExpiredError":
+          statusCode = status.UNAUTHORIZED;
+          message = "Authentication token has expired";
+          errorCode = "TOKEN_EXPIRED";
+          break;
 
-      case "CastError":
-        statusCode = status.BAD_REQUEST;
-        message = "Invalid data format";
-        errorCode = "CAST_ERROR";
-        break;
+        case "CastError":
+          statusCode = status.BAD_REQUEST;
+          message = "Invalid data format";
+          errorCode = "CAST_ERROR";
+          break;
 
-      case "SyntaxError":
-        statusCode = status.BAD_REQUEST;
-        message = "Invalid JSON syntax";
-        errorCode = "SYNTAX_ERROR";
-        break;
+        case "SyntaxError":
+          statusCode = status.BAD_REQUEST;
+          message = "Invalid JSON syntax";
+          errorCode = "SYNTAX_ERROR";
+          break;
+      }
     }
   }
   // ✅ Custom Structured Errors (BetterAuth, etc.)
@@ -175,7 +238,7 @@ export const globalErrorHandler = (
   }
 
   // Build response object
-  const response: ErrorResponse = {
+  const response: TErrorResponse = {
     success: false,
     message,
   };
@@ -185,14 +248,14 @@ export const globalErrorHandler = (
     response.errorCode = errorCode;
   }
 
+  if (errorDetails && (!isProduction || errorCode === "ZOD_VALIDATION_ERROR")) {
+    response.errorDetails = errorDetails;
+  }
+
   // Include detailed info only in development
   if (!isProduction) {
     response.timestamp = timestamp;
     response.path = path;
-
-    if (errorDetails) {
-      response.errorDetails = errorDetails;
-    }
 
     if (stack) {
       response.stack = stack;

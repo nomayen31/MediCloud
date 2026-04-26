@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { DoctorService } from "./doctor.service";
+
 import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
@@ -46,7 +47,7 @@ const getDoctorById = catchAsync(async (req: Request, res: Response) => {
 const updateDoctor = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const payload = req.body;
-    
+
     if (Array.isArray(id)) {
         return sendResponse(res, {
             success: false,
@@ -54,17 +55,9 @@ const updateDoctor = catchAsync(async (req: Request, res: Response) => {
             httpStatusCode: status.BAD_REQUEST
         });
     }
-    
+
     const result = await DoctorService.updateDoctor(id, payload);
-    
-    if (!result) {
-        return sendResponse(res, {
-            success: false,
-            message: "Doctor not found",
-            httpStatusCode: status.NOT_FOUND
-        });
-    }
-    
+
     sendResponse(res, {
         success: true,
         message: "Doctor updated successfully",

@@ -1,33 +1,11 @@
 import { Gender, Role, UserStatus } from "../../../generated/prisma/client";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-
-interface RegisterPatientPayload {
-    name: string;
-    email: string;
-    password: string;
-    profilePicture?: string;
-    dateOfBirth?: string; // ISO date string
-    gender?: Gender;
-    phoneNumber?: string;
-    address?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-    emergencyContact?: string;
-    emergencyPhone?: string;
-    bloodGroup?: string;
-    allergies?: string;
-    medicalHistory?: string;
-}
-
-interface LoginPayload {
-    email: string;
-    password: string;
-}
+import { RegisterPatientSchema, LoginSchema, type RegisterPatientPayload, type LoginPayload } from "./auth.validation";
 
 const registerPatient = async (payload: RegisterPatientPayload) => {
+    // Validate input using Zod
+    const validatedData = RegisterPatientSchema.parse(payload);
     const { 
         name, 
         email, 
@@ -46,7 +24,7 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
         bloodGroup,
         allergies,
         medicalHistory
-    } = payload;
+    } = validatedData;
 
     // Register user with BetterAuth
     const data = await auth.api.signUpEmail({
@@ -136,7 +114,9 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
 };
 
 const login = async (payload: LoginPayload) => {
-    const { email, password } = payload;
+    // Validate input using Zod
+    const validatedData = LoginSchema.parse(payload);
+    const { email, password } = validatedData;
 
     // 🔍 Check if user exists
     const existingUser = await prisma.user.findUnique({

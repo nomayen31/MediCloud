@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
 import { SpecialityService } from "./speciality.service";
+import { validateRequest } from "../../middleware/validateRequest";
 import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 
 
 
 
-const createSpeciality = catchAsync(async (req: Request, res: Response) => {
-    const payload = req.body;
-    const result = await SpecialityService.createSpeciality(payload);
-    
+const createSpeciality = validateRequest(async (req: Request, res: Response) => {
+    const result = await SpecialityService.createSpeciality(req.body);
+
     sendResponse(res, {
         success: true,
         data: result,
@@ -63,10 +63,10 @@ const getSpecialityById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const updateSpeciality = catchAsync(async (req: Request, res: Response) => {
+const updateSpeciality = validateRequest(async (req: Request, res: Response) => {
     const { id } = req.params;
     const payload = req.body;
-    
+
     // Validate that id is a string, not an array
     if (Array.isArray(id)) {
         return sendResponse(res, {
@@ -75,17 +75,9 @@ const updateSpeciality = catchAsync(async (req: Request, res: Response) => {
             httpStatusCode: 400
         });
     }
-    
+
     const result = await SpecialityService.updateSpeciality(id, payload);
-    
-    if (!result) {
-        return sendResponse(res, {
-            success: false,
-            message: "Speciality not found",
-            httpStatusCode: 404
-        });
-    }
-    
+
     sendResponse(res, {
         success: true,
         message: "Speciality updated successfully",

@@ -1,10 +1,13 @@
 import { Prisma, Speciality } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+import { CreateSpecialitySchema, UpdateSpecialitySchema, type CreateSpecialityPayload, type UpdateSpecialityPayload } from "./speciality.validation";
 
-const createSpeciality = async (payload: Prisma.SpecialityCreateInput): Promise<Speciality> => {
+const createSpeciality = async (payload: CreateSpecialityPayload): Promise<Speciality> => {
+    // Validate input using Zod
+    const validatedData = CreateSpecialitySchema.parse(payload);
     
     const speciality = await prisma.speciality.create({
-        data:payload
+        data: validatedData
     })
     return speciality;
 }
@@ -21,10 +24,13 @@ const deleteSpeciality = async (id: string): Promise<Speciality> => {
     return speciality;
 };
 
-const updateSpeciality = async (id: string, payload: Prisma.SpecialityUpdateInput): Promise<Speciality> => {
+const updateSpeciality = async (id: string, payload: UpdateSpecialityPayload): Promise<Speciality> => {
+    // Validate input using Zod
+    const validatedData = UpdateSpecialitySchema.parse(payload);
+    
     const speciality = await prisma.speciality.update({
         where: { id },
-        data: payload
+        data: validatedData
     });
     return speciality;
 };
