@@ -1,6 +1,8 @@
 import { prisma } from "../../lib/prisma.js";
 import { auth } from "../../lib/auth.js";
 import { Role } from "../../../generated/prisma/enums.js";
+import AppError from "../../errorHealps/appError.js";
+import status from "http-status";
 import { ICreateDoctorPayload } from "./user.interface.js";
 import { CreateDoctorUserSchema } from "../auth/auth.validation.js";
 
@@ -15,7 +17,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   });
 
   if (existingUser) {
-    throw new Error("A user with this email already exists");
+    throw new AppError("A user with this email already exists", status.CONFLICT);
   }
 
   const existingDoctor = await prisma.doctor.findUnique({
@@ -23,7 +25,7 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   });
 
   if (existingDoctor) {
-    throw new Error("A doctor with this email already exists");
+    throw new AppError("A doctor with this email already exists", status.CONFLICT);
   }
 
   // Extract speciality IDs
@@ -41,7 +43,10 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
     if (existingSpecialities.length !== specialityIds.length) {
       const foundIds = existingSpecialities.map((s) => s.id);
       const missingIds = specialityIds.filter((id) => !foundIds.includes(id));
-      throw new Error(`Specialities not found: ${missingIds.join(", ")}`);
+      throw new AppError(
+        `Specialities not found: ${missingIds.join(", ")}`,
+        status.NOT_FOUND
+      );
     }
   }
 
@@ -55,7 +60,10 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   });
 
   if (!authData.user) {
-    throw new Error("Failed to register doctor user");
+    throw new AppError(
+      "Failed to register doctor user",
+      status.INTERNAL_SERVER_ERROR
+    );
   }
 
   const userId = authData.user.id;
@@ -151,11 +159,15 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
       console.error("Failed to cleanup user after error:", cleanupError);
     }
 
-    throw new Error(
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    throw new AppError(
       error instanceof Error
         ? error.message
         : "An error occurred while creating the doctor",
-      { cause: error }
+      status.INTERNAL_SERVER_ERROR
     );
   }
 };

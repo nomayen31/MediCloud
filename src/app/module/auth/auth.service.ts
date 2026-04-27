@@ -1,7 +1,10 @@
 import { Role, UserStatus } from "../../../generated/prisma/client.js";
+import AppError from "../../errorHealps/appError.js";
 import { auth } from "../../lib/auth.js";
 import { prisma } from "../../lib/prisma.js";
+import status from "http-status";
 import { RegisterPatientSchema, LoginSchema, type RegisterPatientPayload, type LoginPayload } from "./auth.validation.js";
+import { tokenUtils } from "../../utils/tokens.js";
 
 const registerPatient = async (payload: RegisterPatientPayload) => {
     // Validate input using Zod
@@ -36,7 +39,7 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
     });
 
     if (!data.user) {
-        throw new Error("Failed to register patient");
+        throw new AppError("Failed to register patient", status.INTERNAL_SERVER_ERROR);
     }
 
     const userId = data.user.id;
@@ -104,11 +107,15 @@ const registerPatient = async (payload: RegisterPatientPayload) => {
             console.error("Failed to cleanup user after error:", cleanupError);
         }
         
-        throw new Error(
+        if (error instanceof AppError) {
+            throw error;
+        }
+
+        throw new AppError(
             error instanceof Error
                 ? error.message
                 : "An error occurred while registering the patient",
-            { cause: error }
+            status.INTERNAL_SERVER_ERROR
         );
     }
 };
@@ -163,9 +170,28 @@ const login = async (payload: LoginPayload) => {
         };
     }
 
-    // Add patient data to response
+    const accessToken = tokenUtils.getAccessToken({
+        userId: existingUser.id,
+        role: existingUser.role,
+        name: existingUser.name,
+        email: existingUser.email,
+        status: existingUser.status,
+        isDeleted: existingUser.isDeleted,
+        emailVerified: existingUser.emailVerified,
+    });
+    const refreshToken = tokenUtils.getRefreshToken({
+        userId: existingUser.id,
+        role: existingUser.role,
+        name: existingUser.name,
+        email: existingUser.email,
+        status: existingUser.status,
+        isDeleted: existingUser.isDeleted,
+        emailVerified: existingUser.emailVerified,
+    });
     return {
         ...data,
+        accessToken,
+        refreshToken,
         patient: existingUser.patient
     };
 };

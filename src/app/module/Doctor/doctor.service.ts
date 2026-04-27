@@ -1,5 +1,7 @@
 import { Prisma, Doctor } from "../../../generated/prisma/client.js";
+import AppError from "../../errorHealps/appError.js";
 import { prisma } from "../../lib/prisma.js";
+import status from "http-status";
 import { updateDoctorZodSchema } from "./doctor.validation.js";
 
 const getAllDoctors = async (): Promise<Doctor[]> => {
@@ -27,7 +29,7 @@ const updateDoctor = async (id: string, payload: Prisma.DoctorUpdateInput): Prom
         });
 
         if (!existingDoctor || existingDoctor.isDeleted) {
-            throw new Error("Doctor not found or has been deleted");
+            throw new AppError("Doctor not found or has been deleted", status.NOT_FOUND);
         }
 
         // Update the doctor with validated data
@@ -48,7 +50,7 @@ const deleteDoctor = async (id: string): Promise<Doctor> => {
         });
 
         if (!existingDoctor || existingDoctor.isDeleted) {
-            throw new Error("Doctor not found or already deleted");
+            throw new AppError("Doctor not found or already deleted", status.NOT_FOUND);
         }
 
         // Soft delete: mark as deleted and set deletedAt timestamp
